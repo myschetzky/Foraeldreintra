@@ -1,0 +1,12 @@
+opdater:
+  fields:
+    kategori:
+      required: false
+      selector:
+        select:
+          options:
+            - beskeder
+            - kontaktbog
+            - lektiebog
+            - ugeplan
+            - kalender

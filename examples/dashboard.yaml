@@ -1,0 +1,51 @@
+# Indsæt som et nyt dashboard-view (Rediger dashboard -> ⋮ -> Rå konfigurationseditor) eller kort for kort.
+# Entitets-id'erne afhænger af børnenes navne, som de står i ForældreIntra. Tjek dem under
+# Indstillinger -> Enheder og tjenester -> SkoleIntra, og erstat storebror/lillesoster.
+title: Skole
+path: skole
+icon: mdi:school
+cards:
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: markdown
+        title: 📚 Storebror (8.v)
+        content: >
+          {% set before = now().hour < 14 %}
+          {% set s = 'sensor.storebror_lektier_i_dag' if before else 'sensor.storebror_lektier_naeste_skoledag' %}
+          {% set d = as_datetime(state_attr(s, 'dato')) %}
+          ### {{ 'I dag' if before else 'Til ' ~ ['mandag','tirsdag','onsdag','torsdag','fredag','lørdag','søndag'][d.weekday()] }}
+          {{ state_attr(s, 'markdown') }}
+
+          {% set st = state_attr(s, 'lektiebog_status') or {} %}
+          <font color="gray">Lektiebog · hentet {{ as_timestamp(st.sidst_opdateret) | timestamp_custom('%d/%m kl. %H:%M') if st.sidst_opdateret else 'endnu ikke' }}{{ ' · ⚠️ ' ~ st.fejl if st.fejl }}</font>
+      - type: markdown
+        title: 🎒 Lillesøster (4.s)
+        content: >
+          {% set before = now().hour < 14 %}
+          {% set s = 'sensor.lillesoster_lektier_i_dag' if before else 'sensor.lillesoster_lektier_naeste_skoledag' %}
+          {% set d = as_datetime(state_attr(s, 'dato')) %}
+          ### {{ 'I dag' if before else 'Til ' ~ ['mandag','tirsdag','onsdag','torsdag','fredag','lørdag','søndag'][d.weekday()] }}
+          {{ state_attr(s, 'markdown') }}
+
+          #### Ugens opgaver
+          {{ state_attr('sensor.lillesoster_ugeplan', 'ugens_opgaver_markdown') }}
+  - type: entities
+    title: Beskeder og kontaktbog
+    entities:
+      - entity: sensor.storebror_ulaeste_beskeder
+        secondary_info: last-changed
+      - entity: sensor.lillesoster_ulaeste_beskeder
+      - type: attribute
+        entity: sensor.storebror_ulaeste_beskeder
+        attribute: seneste_emne
+        name: Seneste besked
+      - entity: sensor.storebror_kontaktbog
+      - entity: sensor.lillesoster_kontaktbog
+      - entity: sensor.skoleintra_status
+  - type: calendar
+    initial_view: listWeek
+    entities:
+      - calendar.storebror_skolekalender
+      - calendar.lillesoster_skolekalender

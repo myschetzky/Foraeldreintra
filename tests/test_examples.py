@@ -1,0 +1,41 @@
+"""Eksemplerne i examples/ valideres mod Home Assistant og integrationens rigtige entiteter."""
+
+import re
+from pathlib import Path
+
+from homeassistant.components.automation.config import async_validate_config_item
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.template import Template
+from homeassistant.util.yaml import load_yaml
+
+from tests.test_integration import _setup, fake_client  # noqa: F401
+
+EXAMPLES = Path(__file__).parent.parent / "examples"
+
+
+async def test_automations_are_valid(hass: HomeAssistant):
+    for auto in load_yaml(EXAMPLES / "automations.yaml"):
+        assert await async_validate_config_item(hass, auto["id"], auto) is not None, auto["id"]
+
+
+async def test_dashboard_and_digest_templates_render(hass: HomeAssistant, fake_client, freezer):  # noqa: F811
+    freezer.move_to("2026-10-27 15:00:00+01:00")
+    await _setup(hass)
+
+    dashboard = load_yaml(EXAMPLES / "dashboard.yaml")
+    md_cards = dashboard["cards"][0]["cards"]
+    storebror = Template(md_cards[0]["content"], hass).async_render(parse_result=False)
+    assert "Engelsk" in storebror and "Til onsdag" in storebror
+    lille = Template(md_cards[1]["content"], hass).async_render(parse_result=False)
+    assert "Ugens opgaver" in lille and "Læs 20 min hver dag" in lille
+    assert "hentet 27/10 kl. 15:00" in storebror
+
+    for card in dashboard["cards"][1:]:
+        for ent in card.get("entities", []):
+            entity_id = ent if isinstance(ent, str) else ent["entity"]
+            assert hass.states.get(entity_id) is not None, entity_id
+
+    digest = next(a for a in load_yaml(EXAMPLES / "automations.yaml") if a["id"] == "skoleintra_lektier_til_i_morgen")
+    text = Template(digest["actions"][0]["data"]["message"], hass).async_render(parse_result=False)
+    assert re.search(r"Storebror: Engelsk, Tysk", text), text
+    assert "Lillesøster: ingen" in text

@@ -1,0 +1,86 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to ForældreIntra",
+        "description": "Use the username/password you use on the school's ForældreIntra site (not MitID).",
+        "data": {
+          "school_url": "Skolens ForældreIntra-adresse",
+          "username": "Brugernavn",
+          "password": "Adgangskode",
+          "login_type": "Login-type"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Log ind igen",
+        "description": "ForældreIntra afviste adgangskoden for {username}. Har du skiftet den? Indtast den nye.",
+        "data": {
+          "password": "Adgangskode"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Forkert brugernavn eller adgangskode (eller forkert login-type).",
+      "cannot_connect": "Kunne ikke forbinde til skolen. Tjek adressen og prøv igen.",
+      "manual_action": "Skolen kræver en manuel handling (MitID eller bekræftelse af kontaktoplysninger). Log ind i en browser først.",
+      "unknown_layout": "Login-siden så ikke ud som forventet. Kør tools/probe.py og se README."
+    },
+    "abort": {
+      "already_configured": "Denne konto er allerede sat op.",
+      "reauth_successful": "Login fornyet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SkoleIntra-indstillinger",
+        "description": "Børn fundet: {children}. Vælg for hvert barn, hvor lektier hentes fra. Polling: beskeder og kontaktbog hentes oftest, lektier/ugeplan sjældnere, kalender sjældnest. I stilletiden polles 4 gange sjældnere.",
+        "data": {
+          "own_names": "Jeres egne navne, som de står i kontaktbogen (kommasepareret)",
+          "fast_minutes": "Beskeder og kontaktbog: minutter mellem tjek (dag)",
+          "slow_minutes": "Lektier og ugeplan: minutter mellem tjek (dag)",
+          "calendar_hours": "Kalender: timer mellem tjek",
+          "quiet_start": "Stilletid starter kl.",
+          "quiet_end": "Stilletid slutter kl."
+        }
+      }
+    }
+  },
+  "selector": {
+    "login_type": {
+      "options": {
+        "alm": "Almindeligt ForældreIntra-login",
+        "uni": "UNI-Login (brugernavn/kode)"
+      }
+    },
+    "source": {
+      "options": {
+        "lektiebog": "Lektiebog",
+        "ugeplan": "Ugeplan",
+        "begge": "Begge"
+      }
+    }
+  },
+  "issues": {
+    "layout_changed": {
+      "title": "ForældreIntra: siden har ændret udseende",
+      "description": "Integrationen kunne flere gange i træk ikke finde det forventede indhold. Sidst kendte data vises stadig. Detaljer: {detail}\n\nKør tools/probe.py for at se, hvad skolen returnerer, og opdater integrationen."
+    },
+    "manual_action": {
+      "title": "ForældreIntra kræver handling",
+      "description": "{detail}\n\nLog ind i en browser og løs det. Integrationen prøver selv igen om 2 timer."
+    }
+  },
+  "services": {
+    "opdater": {
+      "name": "Opdater nu",
+      "description": "Hent data fra ForældreIntra med det samme (alle eller én kategori).",
+      "fields": {
+        "kategori": {
+          "name": "Kategori",
+          "description": "Kun denne kategori. Tom = alle."
+        }
+      }
+    }
+  }
+}

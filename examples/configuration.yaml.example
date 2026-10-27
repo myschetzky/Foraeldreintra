@@ -1,0 +1,8 @@
+# VALGFRIT. Den anbefalede vej er UI: Indstillinger -> Enheder og tjenester -> Tilføj -> "SkoleIntra".
+# Brug denne blok, hvis du vil holde loginoplysninger i secrets.yaml. Ved næste genstart
+# importeres den til en almindelig integration (skifter du kode i secrets.yaml, opdateres den).
+skoleintra:
+  - school_url: https://vinderoedprivatskole.m.skoleintra.dk
+    username: !secret skoleintra_username
+    password: !secret skoleintra_password
+    login_type: alm   # "uni" kun hvis skolen sender dig til UNI-Login (ikke MitID)

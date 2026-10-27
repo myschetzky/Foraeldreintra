@@ -1,0 +1,131 @@
+# Tilpas: notify.mobile_app_din_telefon -> din telefons notify-tjeneste (Udviklerværktøjer -> Handlinger).
+# Alle automatiseringer bygger på eventet `skoleintra_new_item`, som integrationen sender med felterne:
+#   barn, kategori (beskeder|kontaktbog|lektiebog|ugeplan|kalender), ændring (ny|ændret|mange),
+#   titel, tekst, afsender, dato, url, retning (kun kontaktbog: til_os|fra_os|ukendt)
+
+- id: skoleintra_ny_besked
+  alias: "Skole: ny besked"
+  mode: queued
+  triggers:
+    - trigger: event
+      event_type: skoleintra_new_item
+      event_data:
+        kategori: beskeder
+  actions:
+    - action: notify.mobile_app_din_telefon
+      data:
+        title: "✉️ {{ trigger.event.data.titel }}"
+        message: >-
+          {{ trigger.event.data.afsender }}: {{ (trigger.event.data.tekst or 'Åbn ForældreIntra')[:300] }}
+        data:
+          url: "{{ trigger.event.data.url }}"          # iOS
+          clickAction: "{{ trigger.event.data.url }}"  # Android
+          group: skoleintra-beskeder
+          tag: "skoleintra-{{ trigger.event.data.nøgle | default('') }}"
+
+- id: skoleintra_kontaktbog
+  alias: "Skole: ny note i kontaktbogen"
+  mode: queued
+  triggers:
+    - trigger: event
+      event_type: skoleintra_new_item
+      event_data:
+        kategori: kontaktbog
+  conditions:
+    # Notér ikke jeres egne noter (kræver at "egne navne" er udfyldt i integrationens indstillinger)
+    - condition: template
+      value_template: "{{ trigger.event.data.retning != 'fra_os' }}"
+  actions:
+    - action: notify.mobile_app_din_telefon
+      data:
+        title: "📒 Kontaktbog – {{ trigger.event.data.barn }}"
+        message: "{{ trigger.event.data.afsender }}: {{ trigger.event.data.tekst[:300] }}"
+        data:
+          url: "{{ trigger.event.data.url }}"
+          clickAction: "{{ trigger.event.data.url }}"
+          push:
+            interruption-level: time-sensitive   # iOS: kommer igennem fokus-tilstand
+          ttl: 0
+          priority: high                         # Android
+
+- id: skoleintra_ny_lektie
+  alias: "Skole: ny eller ændret lektie"
+  mode: queued
+  triggers:
+    - trigger: event
+      event_type: skoleintra_new_item
+      event_data:
+        kategori: lektiebog
+    - trigger: event
+      event_type: skoleintra_new_item
+      event_data:
+        kategori: ugeplan
+  conditions:
+    # Undgå støj om natten; nye lektier samles i dagsoversigten nedenfor alligevel.
+    - condition: time
+      after: "07:00:00"
+      before: "21:00:00"
+  actions:
+    - action: notify.mobile_app_din_telefon
+      data:
+        title: "📚 {{ trigger.event.data.barn }}: {{ trigger.event.data.ændring }} {{ trigger.event.data.kategori }}"
+        message: "{{ trigger.event.data.titel }} – {{ trigger.event.data.tekst[:250] }}"
+        data:
+          group: skoleintra-lektier
+
+- id: skoleintra_lektier_til_i_morgen
+  alias: "Skole: lektier til næste skoledag (kl. 16)"
+  triggers:
+    - trigger: time
+      at: "16:00:00"
+  conditions:
+    - condition: time
+      weekday: [mon, tue, wed, thu, sun]
+  actions:
+    - action: notify.mobile_app_din_telefon
+      data:
+        title: "📚 Lektier til i morgen"
+        message: >-
+          {% set ns = namespace(out=[]) %}
+          {% for s in ['sensor.storebror_lektier_naeste_skoledag', 'sensor.lillesoster_lektier_naeste_skoledag'] %}
+            {% set barn = state_attr(s, 'friendly_name').split(' ')[0] %}
+            {% set items = state_attr(s, 'lektier') or [] %}
+            {% set ns.out = ns.out + [barn ~ ': ' ~ (items | map(attribute='fag') | join(', ') if items else 'ingen')] %}
+          {% endfor %}
+          {{ ns.out | join('\n') }}
+
+- id: skoleintra_kalender_paamindelse
+  alias: "Skole: påmindelse dagen før begivenhed"
+  triggers:
+    - trigger: calendar
+      event: start
+      offset: "-18:00:00"   # kl. 18 dagen før en heldagsbegivenhed
+      entity_id: calendar.storebror_skolekalender
+    - trigger: calendar
+      event: start
+      offset: "-18:00:00"
+      entity_id: calendar.lillesoster_skolekalender
+  actions:
+    - action: notify.mobile_app_din_telefon
+      data:
+        title: "📅 I morgen: {{ trigger.calendar_event.summary }}"
+        message: "{{ trigger.calendar_event.location or '' }} {{ trigger.calendar_event.description or '' }}"
+
+- id: skoleintra_overvaagning
+  alias: "Skole: integrationen virker ikke"
+  triggers:
+    - trigger: state
+      entity_id: sensor.skoleintra_status
+      to: "fejl"
+      for: "02:00:00"
+    - trigger: state
+      entity_id: sensor.skoleintra_status
+      to: "delvis fejl"
+      for: "12:00:00"
+  actions:
+    - action: notify.mobile_app_din_telefon
+      data:
+        title: "⚠️ ForældreIntra-integrationen"
+        message: >-
+          Status: {{ states('sensor.skoleintra_status') }}.
+          {{ state_attr('sensor.skoleintra_status', 'konto_fejl') or 'Se sensor.skoleintra_status -> kategorier.' }}

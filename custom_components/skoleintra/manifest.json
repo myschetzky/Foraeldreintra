@@ -1,0 +1,14 @@
+{
+  "domain": "skoleintra",
+  "name": "SkoleIntra (ForældreIntra)",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/myschetzky/Foraeldreintra",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/myschetzky/Foraeldreintra/issues",
+  "loggers": ["custom_components.skoleintra"],
+  "requirements": ["beautifulsoup4>=4.12"],
+  "version": "0.1.0"
+}
