@@ -23,6 +23,8 @@ async def test_dashboard_and_digest_templates_render(hass: HomeAssistant, fake_c
     await _setup(hass)
 
     dashboard = load_yaml(EXAMPLES / "dashboard.yaml")
+    assert dashboard["type"] == "vertical-stack"  # kan indsættes direkte som ét kort
+    assert all("type" in card for card in dashboard["cards"])
     md_cards = dashboard["cards"][0]["cards"]
     storebror = Template(md_cards[0]["content"], hass).async_render(parse_result=False)
     assert "Engelsk" in storebror and "Til onsdag" in storebror
@@ -39,3 +41,9 @@ async def test_dashboard_and_digest_templates_render(hass: HomeAssistant, fake_c
     text = Template(digest["actions"][0]["data"]["message"], hass).async_render(parse_result=False)
     assert re.search(r"Storebror: Engelsk, Tysk", text), text
     assert "Lillesøster: ingen" in text
+
+
+async def test_dashboard_shows_hint_when_sensor_missing(hass: HomeAssistant):
+    card = load_yaml(EXAMPLES / "dashboard.yaml")["cards"][0]["cards"][0]
+    text = Template(card["content"], hass).async_render(parse_result=False)
+    assert "Fandt ikke `sensor.storebror_lektier" in text

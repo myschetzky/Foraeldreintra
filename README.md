@@ -175,7 +175,7 @@ Valget af kilde styrer, hvilke sensorer der oprettes, og hvad "Lektier i dag" vi
 
 ### Trin 5 – Dashboard og automatiseringer
 
-- Dashboard: `examples/dashboard.yaml` (lektier pr. barn, beskeder, kontaktbog, kalender).
+- Dashboard: `examples/dashboard.yaml` er ét samlet kort (lektier pr. barn, beskeder, kontaktbog, kalender). *Rediger dashboard → Tilføj kort → Manuelt* → indsæt.
 - Automatiseringer: `examples/automations.yaml`. Ret `notify.mobile_app_din_telefon` til din
   telefon. Begge filer er valideret mod Home Assistant 2026.2 i testene.
 

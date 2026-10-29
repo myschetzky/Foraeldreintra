@@ -1,36 +1,42 @@
-# Indsæt som et nyt dashboard-view (Rediger dashboard -> ⋮ -> Rå konfigurationseditor) eller kort for kort.
+# ÉT samlet kort. Rediger dashboard -> Tilføj kort -> "Manuelt" (helt nederst) -> indsæt alt herunder.
 # Entitets-id'erne afhænger af børnenes navne, som de står i ForældreIntra. Tjek dem under
 # Indstillinger -> Enheder og tjenester -> SkoleIntra, og erstat storebror/lillesoster.
-title: Skole
-path: skole
-icon: mdi:school
+type: vertical-stack
 cards:
   - type: grid
     columns: 2
     square: false
     cards:
       - type: markdown
-        title: 📚 Storebror (8.v)
+        title: 📚 Storebror (lektiebog)
         content: >
           {% set before = now().hour < 14 %}
           {% set s = 'sensor.storebror_lektier_i_dag' if before else 'sensor.storebror_lektier_naeste_skoledag' %}
+          {% if state_attr(s, 'dato') is none %}
+          ⚠️ Fandt ikke `{{ s }}`. Ret navnet i kortet.
+          {% else %}
           {% set d = as_datetime(state_attr(s, 'dato')) %}
           ### {{ 'I dag' if before else 'Til ' ~ ['mandag','tirsdag','onsdag','torsdag','fredag','lørdag','søndag'][d.weekday()] }}
           {{ state_attr(s, 'markdown') }}
 
           {% set st = state_attr(s, 'lektiebog_status') or {} %}
           <font color="gray">Lektiebog · hentet {{ as_timestamp(st.sidst_opdateret) | timestamp_custom('%d/%m kl. %H:%M') if st.sidst_opdateret else 'endnu ikke' }}{{ ' · ⚠️ ' ~ st.fejl if st.fejl }}</font>
+          {% endif %}
       - type: markdown
-        title: 🎒 Lillesøster (4.s)
+        title: 🎒 Lillesøster (ugeplan)
         content: >
           {% set before = now().hour < 14 %}
           {% set s = 'sensor.lillesoster_lektier_i_dag' if before else 'sensor.lillesoster_lektier_naeste_skoledag' %}
+          {% if state_attr(s, 'dato') is none %}
+          ⚠️ Fandt ikke `{{ s }}`. Ret navnet i kortet.
+          {% else %}
           {% set d = as_datetime(state_attr(s, 'dato')) %}
           ### {{ 'I dag' if before else 'Til ' ~ ['mandag','tirsdag','onsdag','torsdag','fredag','lørdag','søndag'][d.weekday()] }}
           {{ state_attr(s, 'markdown') }}
 
           #### Ugens opgaver
           {{ state_attr('sensor.lillesoster_ugeplan', 'ugens_opgaver_markdown') }}
+          {% endif %}
   - type: entities
     title: Beskeder og kontaktbog
     entities:
