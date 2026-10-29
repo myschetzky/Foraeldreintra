@@ -85,7 +85,7 @@ Gøres på en hvilken som helst computer med Python 3.12+.
 
 ```powershell
 cd $HOME\Downloads\Foraeldreintra-skoleintra-integration   # mappen fra ZIP-filen
-py -m pip install aiohttp beautifulsoup4
+py -m pip install aiohttp beautifulsoup4 tzdata
 py tools\probe.py https://vinderoedprivatskole.m.skoleintra.dk
 ```
 
@@ -93,7 +93,7 @@ py tools\probe.py https://vinderoedprivatskole.m.skoleintra.dk
 
 ```bash
 git clone https://github.com/myschetzky/Foraeldreintra && cd Foraeldreintra
-pip install aiohttp beautifulsoup4
+pip install aiohttp beautifulsoup4 tzdata
 python3 tools/probe.py https://vinderoedprivatskole.m.skoleintra.dk
 ```
 

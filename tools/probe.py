@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test alle ForældreIntra-datakilder mod din skole, uden Home Assistant.
 
-    pip install aiohttp beautifulsoup4
+    pip install aiohttp beautifulsoup4 tzdata
     export SKOLEINTRA_USERNAME=... SKOLEINTRA_PASSWORD=...      # eller --secrets sti/til/secrets.yaml
     python3 tools/probe.py https://vinderoedprivatskole.m.skoleintra.dk
 
