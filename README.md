@@ -72,14 +72,33 @@ dem selv.
 
 ### Trin 1 – Test mod skolen (5 min)
 
-Gøres på en hvilken som helst computer med Python 3.12+:
+Gøres på en hvilken som helst computer med Python 3.12+.
+
+**Windows (PowerShell, ikke som administrator):**
+
+1. Installer Python: `winget install Python.Python.3.13` (eller hent det fra
+   [python.org](https://www.python.org/downloads/windows/)). Luk PowerShell og åbn den igen bagefter.
+   Hvis du får beskeden *"Python blev ikke fundet … Microsoft Store"*, er Python ikke installeret
+   endnu. Det er kun en genvej i Windows.
+2. Hent koden: på GitHub → *Code* → *Download ZIP*, og pak den ud i fx `Downloads`.
+3. Kør (brug `py`, ikke `python3`, på Windows):
+
+```powershell
+cd $HOME\Downloads\Foraeldreintra-skoleintra-integration   # mappen fra ZIP-filen
+py -m pip install aiohttp beautifulsoup4
+py tools\probe.py https://vinderoedprivatskole.m.skoleintra.dk
+```
+
+**Mac/Linux:**
 
 ```bash
 git clone https://github.com/myschetzky/Foraeldreintra && cd Foraeldreintra
 pip install aiohttp beautifulsoup4
 python3 tools/probe.py https://vinderoedprivatskole.m.skoleintra.dk
-# Brugernavn/adgangskode spørges interaktivt (eller: --secrets /sti/til/secrets.yaml)
 ```
+
+Brugernavn og adgangskode spørges interaktivt. Adgangskoden vises ikke, mens du skriver.
+Alternativt: `--secrets sti/til/secrets.yaml`.
 
 Du får en rapport som denne (fra testserveren):
 
