@@ -99,11 +99,11 @@
   triggers:
     - trigger: calendar
       event: start
-      offset: "-18:00:00"   # kl. 18 dagen før en heldagsbegivenhed
+      offset: "-12:00:00"   # heldag: kl. 12 dagen før · begivenhed kl. 8: kl. 20 aftenen før
       entity_id: calendar.storebror_skolekalender
     - trigger: calendar
       event: start
-      offset: "-18:00:00"
+      offset: "-12:00:00"
       entity_id: calendar.lillesoster_skolekalender
   actions:
     - action: notify.mobile_app_din_telefon
