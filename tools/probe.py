@@ -105,8 +105,12 @@ async def main() -> int:
 
 def summarize(name: str, result, verbose: bool) -> str:
     if name == "lektiebog":
-        days = sorted({i.day.isoformat() for i in result if i.day})
-        s = f"{len(result)} lektier, datoer {days[:6]}, fag {sorted({i.subject for i in result})[:8]}"
+        days = sorted({i.day for i in result if i.day})
+        today = datetime.now(api.parsers.TZ).date()
+        future = [i for i in result if i.day and i.day >= today]
+        span = f"{days[0]} → {days[-1]} ({len(days)} dage)" if days else "ingen datoer"
+        s = (f"{len(result)} lektier, {span}, {len(future)} fra i dag og frem, "
+             f"fag {sorted({i.subject for i in result})[:8]}")
         if verbose:
             s += "".join(f"\n      {i.day} {i.subject}: {i.text[:80]!r}" for i in result[:10])
         return s
